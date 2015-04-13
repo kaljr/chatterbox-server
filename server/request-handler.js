@@ -54,8 +54,8 @@ module.exports = function(request, response) {
     if(request.url === '/') {
       console.log('basic directory');
     }
-    // curl -X GET http://localhost:3000/classes/room1
-    else if (request.url === '/classes/messages') {
+    // curl -X GET http://localhost:3000/classes/messages
+    else if (request.url === '/classes/messages' && request.method === "GET") {
 
       var stringifiedData = JSON.stringify(data);
       headers['Content-Type'] = "application/json";
@@ -63,9 +63,42 @@ module.exports = function(request, response) {
       response.writeHead(statusCode, headers);
       // send the response with stringified data
       response.end(stringifiedData);
+      // curl -X POST http://localhost:3000/send --data '{"short_description":"Test with CURL"}'
+    } else if(request.method === 'POST') {
+      // data revceived from the request;
+      var postData = '',
+          parsedData;
+
+      headers['Content-Type'] = "application/json";
+      response.writeHead(201,headers);
+
+      request.on('data', function(chunk) {
+        // add the chunk data
+        postData += chunk;
+        console.log('postData!', postData);
+        parsedData = JSON.parse(postData);
+        parsedData['createdAt'] = new Date();
+        data.results.unshift(parsedData);
+        response.end(JSON.stringify(data));
+      });
+
+
+
+      // add to the data Object the new post message
+      // var parsedData = JSON.parse(postData);
+      // parsedData['createdAt'] = new Date();
+      // console.log('parsedData added createdAt', parsedData);
+      // data.results.unshift();
+
+      // finish the response
+      response.end();
+
+    } else {
+      headers['Content-Type'] = "application/json";
+      response.writeHead(404,headers)
+      response.end('Page not found');
     }
 
-    response.end();
   };
 
   // These headers will allow Cross-Origin Resource Sharing (CORS).
