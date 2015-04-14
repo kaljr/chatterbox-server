@@ -5,7 +5,7 @@ $(function() {
 //TODO: The current 'addFriend' function just adds the class 'friend'
 //to all messages sent by the user
     // server: 'https://api.parse.com/1/classes/chatterbox/',
-    server: 'https://localhost:3000/classes/messages',
+    server: 'http://localhost:3000/classes/messages',
     username: 'anonymous',
     roomname: 'lobby',
     lastMessageId: 0,
@@ -44,7 +44,7 @@ $(function() {
         url: app.server,
         type: 'POST',
         data: JSON.stringify(data),
-        contentType: 'application/json',
+        contentType: 'text/plain',
         success: function (data) {
           console.log('chatterbox: Message sent');
           // Trigger a fetch to update the messages, pass true to animate
@@ -59,8 +59,8 @@ $(function() {
       $.ajax({
         url: app.server,
         type: 'GET',
-        contentType: 'application/json',
-        data: { order: '-createdAt'},
+        contentType: 'text/plain',
+        //data: { order: '-createdAt'},
         success: function(data) {
           console.log('chatterbox: Messages fetched');
 
@@ -72,7 +72,7 @@ $(function() {
           var displayedRoom = $('.chat span').first().data('roomname');
           app.stopSpinner();
           // Only bother updating the DOM if we have a new message
-          if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
+          //if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
             // Update the UI with the fetched rooms
             app.populateRooms(data.results);
 
@@ -81,7 +81,7 @@ $(function() {
 
             // Store the ID of the most recent message
             app.lastMessageId = mostRecentMessage.objectId;
-          }
+          //}
         },
         error: function(data) {
           console.error('chatterbox: Failed to fetch messages');
