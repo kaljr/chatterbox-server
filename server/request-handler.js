@@ -12,7 +12,7 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
-module.exports = function(request, response) {
+exports.requestHandler = function(request, response) {
 
   // Message's DataBase
   var data = require('./data');
@@ -55,8 +55,8 @@ module.exports = function(request, response) {
       console.log('basic directory');
     }
     // curl -X GET http://localhost:3000/classes/messages
-    else if (request.url === '/classes/messages' && request.method === "GET") {
-
+    else if (request.method === "GET" && request.url === '/classes/messages') {
+      console.log('GET',request.url);
       var stringifiedData = JSON.stringify(data);
       headers['Content-Type'] = "application/json";
       // write the HEAD
@@ -64,8 +64,20 @@ module.exports = function(request, response) {
       // send the response with stringified data
       response.end(stringifiedData);
       // curl -X POST http://localhost:3000/send --data '{"short_description":"Test with CURL"}'
-    } else if(request.method === 'POST') {
+    }
+
+
+    else if(request.method === 'GET' && request.url === '/classes/room1') {
+      console.log('GET',request.url);
+      headers['Content-Type'] = "text/plain";
+      response.writeHead(200, headers);
+      response.end(JSON.stringify(data));
+    }
+
+
+    else if(request.method === 'POST' && request.url === '/classes/messages') {
       // data revceived from the request;
+         console.log('POST', request.url)
       var postData = '',
           parsedData;
 
@@ -75,25 +87,36 @@ module.exports = function(request, response) {
       request.on('data', function(chunk) {
         // add the chunk data
         postData += chunk;
-        console.log('postData!', postData);
         parsedData = JSON.parse(postData);
         parsedData['createdAt'] = new Date();
         data.results.unshift(parsedData);
         response.end(JSON.stringify(data));
       });
 
+    }
 
+    else if(request.method === 'POST' && request.url === '/classes/room1') {
+        console.log('POST', request.url);
+        var postData = '',
+            parsedData;
 
-      // add to the data Object the new post message
-      // var parsedData = JSON.parse(postData);
-      // parsedData['createdAt'] = new Date();
-      // console.log('parsedData added createdAt', parsedData);
-      // data.results.unshift();
+        headers['Content-Type'] = "application/json";
+        response.writeHead(201,headers);
 
-      // finish the response
-      response.end();
+        request.on('data', function(chunk) {
+          // add the chunk data
+          postData += chunk;
+          parsedData = JSON.parse(postData);
+          parsedData['createdAt'] = new Date();
+          data.results.unshift(parsedData);
+          response.end(JSON.stringify(data));
+        })
 
-    } else {
+        response.end();
+    }
+
+    else {
+         console.log('ANY',request.url)
       headers['Content-Type'] = "application/json";
       response.writeHead(404,headers)
       response.end('Page not found');
